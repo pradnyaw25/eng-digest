@@ -1,0 +1,39 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const issues = await getCollection('issues', ({ data }) => !data.draft);
+  return issues.map((issue) => ({
+    params: { id: issue.id },
+    props: { issue },
+  }));
+}
+
+const { issue } = Astro.props;
+const { Content } = await render(issue);
+
+const fmt = (d) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<Base title={issue.data.title} description={issue.data.dek}>
+  <article>
+    <header>
+      <span class="meta">{fmt(issue.data.date)} · {issue.data.readingTime} read</span>
+      <h1 style="margin-top:10px">{issue.data.title}</h1>
+      <p class="dek">{issue.data.dek}</p>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <div class="subscribe">
+    <p>
+      New issue every Saturday. <a href="/rss.xml">Subscribe via RSS</a>, or
+      <a href="/">browse the archive</a>.
+    </p>
+  </div>
+</Base>

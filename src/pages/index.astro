@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const issues = (await getCollection('issues', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<Base
+  title="The Weekend Engineering Digest"
+  description="A weekly five-minute read on distributed systems, architecture, AI infrastructure, and platform engineering — drawn from what engineering teams actually published that week."
+>
+  <h1>The Weekend Engineering Digest</h1>
+  <p class="dek">
+    Every Saturday: four to six things worth knowing from the week in industry engineering —
+    distributed systems, architecture, AI infrastructure, platform and reliability. Primary
+    sources, concrete tradeoffs, no vendor copy. About a five-minute read.
+  </p>
+
+  <div class="subscribe">
+    <p>
+      No email list yet — <a href="/rss.xml">subscribe via RSS</a> and new issues show up in your
+      reader. An email edition is coming once there's a back catalog worth signing up for.
+    </p>
+  </div>
+
+  <h2>Issues</h2>
+
+  {issues.length === 0 && <p class="dek">No issues published yet.</p>}
+
+  {issues.map((issue) => (
+    <div class="archive-entry">
+      <span class="meta">{fmt(issue.data.date)}</span>
+      <h2><a href={`/issues/${issue.id}`}>{issue.data.title}</a></h2>
+      <p class="dek">{issue.data.dek}</p>
+    </div>
+  ))}
+</Base>
